@@ -6,6 +6,7 @@ var MoreStatuses = function () {};
   "use strict";
   var interval;
   const fs = require("fs");
+  
   MoreStatuses.prototype.start = function () {
     const getStatusModule = WebpackModules.findByUniqueProperties(
       ["getStatus"],
@@ -71,7 +72,6 @@ var MoreStatuses = function () {};
           }
         }
       } catch (ignore) {
-        console.error(ignore);
       }
 
       // user popout
@@ -160,12 +160,34 @@ var MoreStatuses = function () {};
       svg.querySelector("rect").setAttribute("x", 60);
       svg.querySelector("rect").setAttribute("y", 52);
     }
+    try{
+      const props=window.ZLibrary.ReactTools.getReactProperty(svg,"memoizedProps").children[1].props
+      props.text=props.text.split("(")[0]+" (Mobile)"
+    }catch(ignore){}
   }
   function setToWeb(svg) {
+    
     var rect = svg.querySelectorAll("rect")[
       svg.querySelectorAll("rect").length - 1
     ];
-    rect.setAttribute("mask", "");
+    if(!rect){return}
+    rect.setAttribute("mask","")
+    // var x=parseInt(rect.getAttribute("x"))
+    // var width=parseInt(rect.getAttribute("width"))
+    // var fill=rect.getAttribute("fill")
+    // rect.remove()
+    // console.log(x)
+    // console.log(width)
+    // svg.innerHTML+='<text x="'+x+'" y="'+(x+width)+'" fill="'+fill+'" font-size="200%" class="pointerEvents-2zdfdO da-pointerEvents">W</text>'
+    // svg.innerHTML+='<circle cx="'+(x+width/2)+'" cy="'+(x+width/2)+'" r="'+width/2+'" fill="'+fill+'" class="pointerEvents-2zdfdO da-pointerEvents"></circle>'
+    // svg.innerHTML+='<circle cx="'+(x+width/2)+'" cy="'+(x+width/2)+'" r="'+(width/2-2)+'" fill="black" class="pointerEvents-2zdfdO da-pointerEvents"></circle>'
+
+    // console.log(svg.innerHTML)
+    try{
+      const props=window.ZLibrary.ReactTools.getReactProperty(svg,"memoizedProps").children[1].props
+      props.text=props.text.split("(")[0]+" (Web)"
+    }catch(ignore){}
+
   }
   function webOrMobile(clientStatus) {
     return (
