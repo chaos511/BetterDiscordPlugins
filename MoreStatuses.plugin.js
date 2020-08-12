@@ -71,8 +71,9 @@ var MoreStatuses = function () {};
 
       // user popout
       try {
-        var userId = document
-          .querySelector(".da-popout")
+        var userId = (document
+          .querySelector(".da-popout")||document
+          .querySelector(".da-userPopout"))
           .querySelector("img")
           .src.split("/")[4];
         if (
@@ -80,7 +81,9 @@ var MoreStatuses = function () {};
           !(clientStatuses[userId].web || clientStatuses[userId].desktop)
         ) {
           setToMobile(
-            document.querySelector(".da-popout").querySelector("svg")
+            (document
+              .querySelector(".da-popout")||document
+              .querySelector(".da-userPopout")).querySelector("svg")
           );
         }
       } catch (ignore) {}
