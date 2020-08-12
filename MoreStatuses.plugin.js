@@ -32,13 +32,14 @@ var MoreStatuses = function () {};
       for (var friend of friendsList) {
         if (friendsList.length > 0) {
           var userId = friend.querySelector("img").src.split("/")[4];
-          if (
-            clientStatuses[userId].mobile &&
-            !(clientStatuses[userId].web || clientStatuses[userId].desktop)
-          ) {
-            setToMobile(
-              friend.querySelector(".da-avatar").querySelector("svg")
-            );
+          if (webOrMobile(clientStatuses[userId])) {
+            if (clientStatuses[userId].mobile) {
+              setToMobile(
+                friend.querySelector(".da-avatar").querySelector("svg")
+              );
+            } else {
+              setToWeb(friend.querySelector(".da-avatar").querySelector("svg"));
+            }
           }
         }
       }
@@ -54,16 +55,20 @@ var MoreStatuses = function () {};
             userId = statusId;
           }
         }
-        if (
-          userId &&
-          clientStatuses[userId].mobile &&
-          !(clientStatuses[userId].web || clientStatuses[userId].desktop)
-        ) {
-          setToMobile(
-            document
-              .querySelector("[aria-label='Channel header']")
-              .querySelectorAll("svg")[1]
-          );
+        if (userId && webOrMobile(clientStatuses[userId])) {
+          if (clientStatuses[userId].mobile) {
+            setToMobile(
+              document
+                .querySelector("[aria-label='Channel header']")
+                .querySelectorAll("svg")[1]
+            );
+          } else {
+            setToWeb(
+              document
+                .querySelector("[aria-label='Channel header']")
+                .querySelectorAll("svg")[1]
+            );
+          }
         }
       } catch (ignore) {
         console.error(ignore);
@@ -71,29 +76,34 @@ var MoreStatuses = function () {};
 
       // user popout
       try {
-        var userId = (document
-          .querySelector(".da-popout")||document
-          .querySelector(".da-userPopout"))
+        var userId = (
+          document.querySelector(".da-popout") ||
+          document.querySelector(".da-userPopout")
+        )
           .querySelector("img")
           .src.split("/")[4];
-        if (
-          clientStatuses[userId].mobile &&
-          !(clientStatuses[userId].web || clientStatuses[userId].desktop)
-        ) {
-          setToMobile(
-            (document
-              .querySelector(".da-popout")||document
-              .querySelector(".da-userPopout")).querySelector("svg")
-          );
+        if (webOrMobile(clientStatuses[userId])) {
+          if (clientStatuses[userId].mobile) {
+            setToMobile(
+              (
+                document.querySelector(".da-popout") ||
+                document.querySelector(".da-userPopout")
+              ).querySelector("svg")
+            );
+          } else {
+            setToWeb(
+              (
+                document.querySelector(".da-popout") ||
+                document.querySelector(".da-userPopout")
+              ).querySelector("svg")
+            );
+          }
         }
       } catch (ignore) {}
 
-      //dm list and server member list
+      //dm list, server member list, and profile
       for (var userId in clientStatuses) {
-        if (
-          clientStatuses[userId].mobile &&
-          !(clientStatuses[userId].web || clientStatuses[userId].desktop)
-        ) {
+        if (webOrMobile(clientStatuses[userId])) {
           var avatarImages = document.querySelectorAll(
             "[user_by_bdfdb^='" + userId + "']"
           );
@@ -102,7 +112,11 @@ var MoreStatuses = function () {};
               avatarImages[image].className &&
               avatarImages[image].className.includes("da-wrapper")
             ) {
-              setToMobile(avatarImages[image].querySelector("svg"));
+              if (clientStatuses[userId].mobile) {
+                setToMobile(avatarImages[image].querySelector("svg"));
+              } else {
+                setToWeb(avatarImages[image].querySelector("svg"));
+              }
             }
           }
         }
@@ -111,6 +125,12 @@ var MoreStatuses = function () {};
   };
   function setToMobile(svg) {
     if (svg.querySelector("rect").getAttribute("x") == "22") {
+      //member list
+      if (svg.querySelector("foreignObject")) {
+        svg
+          .querySelector("foreignObject")
+          .setAttribute("mask", "url(#svg-mask-avatar-status-mobile-32)");
+      }
       svg
         .querySelector("rect")
         .setAttribute("mask", "url(#svg-mask-status-online-mobile)");
@@ -118,12 +138,8 @@ var MoreStatuses = function () {};
       svg.querySelector("rect").setAttribute("width", 10);
       svg.querySelector("rect").setAttribute("x", 22);
       svg.querySelector("rect").setAttribute("y", 17);
-      if (svg.querySelector("foreignObject")) {
-        svg
-          .querySelector("foreignObject")
-          .setAttribute("mask", "url(#svg-mask-avatar-status-mobile-32)");
-      }
     } else if (svg.querySelector("rect").getAttribute("x") == "0") {
+      //pop out
       svg
         .querySelectorAll("rect")
         [svg.querySelectorAll("rect").length - 1].setAttribute(
@@ -131,19 +147,32 @@ var MoreStatuses = function () {};
           "url(#svg-mask-status-online-mobile)"
         );
     } else {
-      svg
-        .querySelector("rect")
-        .setAttribute("mask", "url(#svg-mask-status-online-mobile)");
       if (svg.querySelector("foreignObject")) {
         svg
           .querySelector("foreignObject")
           .setAttribute("mask", "url(#svg-mask-avatar-status-mobile-80)");
       }
+      svg
+        .querySelector("rect")
+        .setAttribute("mask", "url(#svg-mask-status-online-mobile)");
       svg.querySelector("rect").setAttribute("height", 24);
       svg.querySelector("rect").setAttribute("width", 16);
       svg.querySelector("rect").setAttribute("x", 60);
       svg.querySelector("rect").setAttribute("y", 52);
     }
+  }
+  function setToWeb(svg) {
+    var rect = svg.querySelectorAll("rect")[
+      svg.querySelectorAll("rect").length - 1
+    ];
+    rect.setAttribute("mask", "");
+  }
+  function webOrMobile(clientStatus) {
+    return (
+      ((clientStatus.mobile && !clientStatus.web) ||
+        (!clientStatus.mobile && clientStatus.web)) &&
+      !clientStatus.desktop
+    );
   }
   MoreStatuses.prototype.stop = function () {
     clearInterval(interval);
@@ -158,7 +187,7 @@ var MoreStatuses = function () {};
   };
 
   MoreStatuses.prototype.getDescription = function () {
-    return "Shows mobile version of idle and do not disturb";
+    return "Shows mobile and web version of idle and do not disturb";
   };
 
   MoreStatuses.prototype.getVersion = function () {
@@ -178,7 +207,6 @@ var MoreStatuses = function () {};
     DI.versionCompare(DI.version || "", "1.9") >= 0
   );
 
- 
   /**
    * Function with no arguments and no return value that may be called to revert changes made by {@link monkeyPatch} method, restoring (unpatching) original method.
    * @callback cancelPatch
