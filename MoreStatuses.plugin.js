@@ -6,7 +6,7 @@ var MoreStatuses = function () {};
   "use strict";
   var interval;
   const fs = require("fs");
-  
+
   MoreStatuses.prototype.start = function () {
     const getStatusModule = WebpackModules.findByUniqueProperties(
       ["getStatus"],
@@ -28,22 +28,24 @@ var MoreStatuses = function () {};
     interval = setInterval(() => {
       var clientStatuses = getStatusModule.getState().clientStatuses;
 
-      //friends list
-      var friendsList = document.querySelectorAll(".da-peopleListItem");
-      for (var friend of friendsList) {
-        if (friendsList.length > 0) {
-          var userId = friend.querySelector("img").src.split("/")[4];
-          if (webOrMobile(clientStatuses[userId])) {
-            if (clientStatuses[userId].mobile) {
-              setToMobile(
-                friend.querySelector(".da-avatar").querySelector("svg")
-              );
-            } else {
-              setToWeb(friend.querySelector(".da-avatar").querySelector("svg"));
+      //dm , server member,friends list and profile
+      var avatarList = document.querySelectorAll(".da-avatar");
+      for (var avatar of avatarList) {
+        if (avatarList.length > 0) {
+          // console.log(avatar);
+          try {
+            var userId = avatar.querySelector("img").src.split("/")[4];
+            if (webOrMobile(clientStatuses[userId])) {
+              if (clientStatuses[userId].mobile) {
+                setToMobile(avatar.querySelector("svg"));
+              } else {
+                setToWeb(avatar.querySelector("svg"));
+              }
             }
-          }
+          } catch (e) {}
         }
       }
+
 
       //dm title
       try {
@@ -71,8 +73,7 @@ var MoreStatuses = function () {};
             );
           }
         }
-      } catch (ignore) {
-      }
+      } catch (ignore) {}
 
       // user popout
       try {
@@ -101,26 +102,6 @@ var MoreStatuses = function () {};
         }
       } catch (ignore) {}
 
-      //dm list, server member list, and profile
-      for (var userId in clientStatuses) {
-        if (webOrMobile(clientStatuses[userId])) {
-          var avatarImages = document.querySelectorAll(
-            "[user_by_bdfdb^='" + userId + "']"
-          );
-          for (var image in avatarImages) {
-            if (
-              avatarImages[image].className &&
-              avatarImages[image].className.includes("da-wrapper")
-            ) {
-              if (clientStatuses[userId].mobile) {
-                setToMobile(avatarImages[image].querySelector("svg"));
-              } else {
-                setToWeb(avatarImages[image].querySelector("svg"));
-              }
-            }
-          }
-        }
-      }
     }, 1000);
   };
   function setToMobile(svg) {
@@ -160,18 +141,22 @@ var MoreStatuses = function () {};
       svg.querySelector("rect").setAttribute("x", 60);
       svg.querySelector("rect").setAttribute("y", 52);
     }
-    try{
-      const props=window.ZLibrary.ReactTools.getReactProperty(svg,"memoizedProps").children[1].props
-      props.text=props.text.split("(")[0]+" (Mobile)"
-    }catch(ignore){}
+    try {
+      const props = window.ZLibrary.ReactTools.getReactProperty(
+        svg,
+        "memoizedProps"
+      ).children[1].props;
+      props.text = props.text.split("(")[0] + " (Mobile)";
+    } catch (ignore) {}
   }
   function setToWeb(svg) {
-    
     var rect = svg.querySelectorAll("rect")[
       svg.querySelectorAll("rect").length - 1
     ];
-    if(!rect){return}
-    rect.setAttribute("mask","")
+    if (!rect) {
+      return;
+    }
+    rect.setAttribute("mask", "");
     // var x=parseInt(rect.getAttribute("x"))
     // var width=parseInt(rect.getAttribute("width"))
     // var fill=rect.getAttribute("fill")
@@ -183,11 +168,13 @@ var MoreStatuses = function () {};
     // svg.innerHTML+='<circle cx="'+(x+width/2)+'" cy="'+(x+width/2)+'" r="'+(width/2-2)+'" fill="black" class="pointerEvents-2zdfdO da-pointerEvents"></circle>'
 
     // console.log(svg.innerHTML)
-    try{
-      const props=window.ZLibrary.ReactTools.getReactProperty(svg,"memoizedProps").children[1].props
-      props.text=props.text.split("(")[0]+" (Web)"
-    }catch(ignore){}
-
+    try {
+      const props = window.ZLibrary.ReactTools.getReactProperty(
+        svg,
+        "memoizedProps"
+      ).children[1].props;
+      props.text = props.text.split("(")[0] + " (Web)";
+    } catch (ignore) {}
   }
   function webOrMobile(clientStatus) {
     return (
