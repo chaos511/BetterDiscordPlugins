@@ -28,8 +28,8 @@ var MoreStatuses = function () {};
     interval = setInterval(() => {
       var clientStatuses = getStatusModule.getState().clientStatuses;
 
-      //dm , server member,friends list and profile
-      var avatarList = document.querySelectorAll(".da-avatar");
+      //dm , server member,friends,mutual friends list and profile
+      var avatarList = document.querySelectorAll(".da-avatar,.da-listAvatar,.da-headerAvatar");
       for (var avatar of avatarList) {
         if (avatarList.length > 0) {
           // console.log(avatar);
@@ -45,7 +45,6 @@ var MoreStatuses = function () {};
           } catch (e) {}
         }
       }
-
 
       //dm title
       try {
@@ -200,7 +199,7 @@ var MoreStatuses = function () {};
   };
 
   MoreStatuses.prototype.getVersion = function () {
-    return "0.0.0";
+    return "0.0.1";
   };
 
   MoreStatuses.prototype.getAuthor = function () {
@@ -209,6 +208,13 @@ var MoreStatuses = function () {};
 
   // If samogot's DiscordInternals lib exists, use it. Otherwise, fall back on bundled code below.
   // See: https://github.com/samogot/betterdiscord-plugins/tree/master/v2/1Lib%20Discord%20Internals
+	if (!document.getElementById('DiscordInternalsLib')) {
+		var DiscordInternalsLib = document.createElement("script");
+		DiscordInternalsLib.setAttribute("type", "text/javascript");
+		DiscordInternalsLib.setAttribute("src", "https://bddeveloper.github.io/1lib_discord_internals.plugin.js");
+		DiscordInternalsLib.setAttribute("id", "DiscordInternalsLib");
+		document.head.appendChild(DiscordInternalsLib);
+	}
   const DI = window.DiscordInternals;
   const hasLib = !!(
     DI &&
